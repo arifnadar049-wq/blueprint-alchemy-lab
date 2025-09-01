@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Play, Pause, Square, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { useAppStore } from '@/store/useAppStore';
 import { formatTime } from '@/utils/helpers';
 import { QuickAdd } from './QuickAdd';
+import { BrandLogo } from './BrandLogo';
+import { cn } from '@/lib/utils';
 
 export const Header = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const { 
     currentTimer, 
@@ -40,17 +44,18 @@ export const Header = () => {
   return (
     <div className="bg-card border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
-        {/* Left: Quick Add & Search */}
+        {/* Left: Brand, Quick Add & Search */}
         <div className="flex items-center gap-4 flex-1">
+          <BrandLogo size="sm" showText={false} />
           <QuickAdd />
           
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search..."
+              placeholder="Search tasks, habits, or lists..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-[200px]"
+              className="pl-10 w-[250px] bg-muted/50 border-border focus:bg-background"
             />
           </div>
         </div>
@@ -107,14 +112,17 @@ export const Header = () => {
             </>
           )}
           
-          
-          
-          <Button variant="ghost" size="sm" className="gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="gap-2 text-foreground hover:bg-muted"
+            onClick={() => navigate('/profile')}
+          >
             <User className="h-4 w-4" />
             Profile
           </Button>
           
-          <Badge variant="secondary" className="bg-gradient-primary text-primary-foreground">
+          <Badge variant="secondary" className="bg-gradient-primary text-primary-foreground font-semibold">
             GRIT Mode
           </Badge>
         </div>
@@ -122,7 +130,3 @@ export const Header = () => {
     </div>
   );
 };
-
-function cn(...inputs: (string | undefined)[]): string {
-  return inputs.filter(Boolean).join(' ');
-}

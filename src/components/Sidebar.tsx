@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Settings as SettingsIcon, BarChart3, Inbox, Calendar, CalendarDays, CheckCircle, MoreHorizontal, Edit2, Activity, User, CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -7,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/useAppStore';
 import { ListManager } from './ListManager';
+import { BrandLogo } from './BrandLogo';
 
 interface SidebarProps {
   currentView: string;
@@ -14,6 +16,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView }) => {
+  const navigate = useNavigate();
   const { lists, selectedListId, setSelectedListId, tasks } = useAppStore();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -42,14 +45,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView })
       collapsed ? "w-14" : "w-64"
     )}>
       <div className="p-4">
-        {!collapsed && (
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">G</span>
-            </div>
-            <span className="font-semibold text-foreground">GRIT</span>
-          </div>
-        )}
+        {/* Header */}
+        <div className="mb-6">
+          <BrandLogo 
+            size="md" 
+            showText={!collapsed}
+            className={cn("transition-all duration-200", collapsed && "justify-center")}
+          />
+        </div>
 
         {/* Quick Add */}
         <Button 
@@ -125,11 +128,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView })
             <Button
               variant="ghost"
               size={collapsed ? "icon" : "default"}
-              className="w-full justify-start gap-3 hover:bg-secondary/50 transition-colors"
-              onClick={() => window.location.href = '/profile'}
+              className={cn(
+                "w-full justify-start gap-3 text-left text-foreground hover:bg-muted",
+                collapsed && "justify-center px-2"
+              )}
+              onClick={() => navigate('/profile')}
             >
-              <User className="h-4 w-4" />
-              {!collapsed && "Profile"}
+              <User className="h-4 w-4 flex-shrink-0" />
+              {!collapsed && <span>Profile</span>}
             </Button>
 
             <Button
