@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Calendar, CheckCircle2, Clock, Target, TrendingUp, ArrowLeft } from 'lucide-react';
+import { TaskForm } from '@/components/TaskForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -268,23 +269,9 @@ const Today = () => {
           </Card>
         </div>
 
-        {/* Add Task Button Dialog - simplified for now */}
+        {/* Add Task Form */}
         {showTaskForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <Card className="w-full max-w-md m-4">
-              <CardHeader>
-                <CardTitle>Add New Task</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Task creation will be available soon. For now, please use the main app to add tasks.
-                </p>
-                <Button onClick={() => setShowTaskForm(false)} className="w-full">
-                  Close
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          <TaskForm onClose={() => setShowTaskForm(false)} />
         )}
       </div>
     </div>
