@@ -130,7 +130,10 @@ const Today = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={() => setShowTaskForm(true)} className="gap-2">
+            <Button 
+              onClick={() => setShowTaskForm(true)} 
+              className="gap-2 bg-gradient-primary hover:opacity-90 shadow-medium hover:shadow-elegant transition-all"
+            >
               <Plus className="h-4 w-4" />
               Add Task
             </Button>

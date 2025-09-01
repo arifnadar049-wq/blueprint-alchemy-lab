@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Play, Clock, Calendar, CheckCircle2, Circle, AlertTriangle } from 'lucide-react';
+import { Plus, Play, Clock, Calendar, CheckCircle2, Circle, AlertTriangle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,8 @@ import { TaskStatus } from '@/types';
 import { formatDate, formatDuration, getTaskProgress, isOverdue, sortTasksByPriority } from '@/utils/helpers';
 import { cn } from '@/lib/utils';
 import { TaskForm } from './TaskForm';
+import { TaskEditForm } from './TaskEditForm';
+import { format, isToday } from 'date-fns';
 
 export const TaskList = () => {
   const { 
@@ -19,6 +21,7 @@ export const TaskList = () => {
     setSelectedTask, 
     startTimer,
     completeTask,
+    deleteTask,
     currentTimer
   } = useAppStore();
 
@@ -43,6 +46,13 @@ export const TaskList = () => {
         const dueDate = new Date(task.dueDate);
         return dueDate >= weekStart && dueDate <= weekEnd;
       });
+    } else if (selectedListId === 'completed') {
+      // Show only today's completed tasks
+      return tasks.filter(task => 
+        task.status === TaskStatus.COMPLETED && 
+        task.completedAt && 
+        isToday(new Date(task.completedAt))
+      );
     } else {
       return tasks.filter(task => task.listId === selectedListId);
     }
@@ -62,6 +72,13 @@ export const TaskList = () => {
   const handleCompleteTask = (taskId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     completeTask(taskId);
+  };
+
+  const handleDeleteTask = async (taskId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
+      await deleteTask(taskId);
+    }
   };
 
   const getStatusIcon = (status: TaskStatus, taskId: string) => {
@@ -107,24 +124,57 @@ export const TaskList = () => {
           {/* Task Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h3 className={cn(
-                "font-medium text-card-foreground leading-5",
-                task.status === TaskStatus.COMPLETED && "line-through text-muted-foreground"
-              )}>
-                {task.title}
-              </h3>
+              <div className="flex-1 min-w-0">
+                <h3 className={cn(
+                  "font-medium text-card-foreground leading-5",
+                  task.status === TaskStatus.COMPLETED && "line-through text-muted-foreground"
+                )}>
+                  {task.title}
+                </h3>
+              </div>
               
-              {/* Timer Button */}
-              {task.status !== TaskStatus.COMPLETED && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => handleStartTimer(task.id, e)}
-                >
-                  <Play className="h-3 w-3" />
-                </Button>
-              )}
+              {/* Action Buttons */}
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Timer Button - only for incomplete tasks */}
+                {task.status !== TaskStatus.COMPLETED && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={(e) => handleStartTimer(task.id, e)}
+                    title="Start Timer"
+                  >
+                    <Play className="h-3 w-3" />
+                  </Button>
+                )}
+                
+                {/* Edit Button - for all tasks except completed section */}
+                {selectedListId !== 'completed' && (
+                  <TaskEditForm task={task} trigger={
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      title="Edit Task"
+                    >
+                      <Calendar className="h-3 w-3" />
+                    </Button>
+                  } />
+                )}
+                
+                {/* Delete Button - only for non-completed sections */}
+                {selectedListId !== 'completed' && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 hover:text-destructive"
+                    onClick={(e) => handleDeleteTask(task.id, e)}
+                    title="Delete Task"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Task Details */}
@@ -193,13 +243,18 @@ export const TaskList = () => {
               {selectedListId === 'backlog' ? 'Backlog' : 
                selectedListId === 'today' ? 'Today' :
                selectedListId === 'week' ? 'This Week' :
+               selectedListId === 'completed' ? 'Completed Today' :
                selectedList?.name || 'Tasks'}
             </h1>
             <Badge variant="secondary">
-              {filteredTasks.filter(t => t.status !== TaskStatus.COMPLETED).length}
+              {selectedListId === 'completed' 
+                ? filteredTasks.length 
+                : filteredTasks.filter(t => t.status !== TaskStatus.COMPLETED).length
+              }
             </Badge>
           </div>
-          <TaskForm />
+          {/* Only show TaskForm for non-completed sections */}
+          {selectedListId !== 'completed' && <TaskForm />}
         </div>
       </div>
 
@@ -208,11 +263,21 @@ export const TaskList = () => {
         {sortedTasks.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-muted-foreground mb-4">
-              <Circle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg">No tasks in this list</p>
-              <p className="text-sm">Create your first task to get started</p>
+              <CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              {selectedListId === 'completed' ? (
+                <>
+                  <p className="text-lg">No tasks completed today</p>
+                  <p className="text-sm">Complete some tasks to see them here</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg">No tasks in this list</p>
+                  <p className="text-sm">Create your first task to get started</p>
+                </>
+              )}
             </div>
-            <TaskForm />
+            {/* Only show TaskForm for non-completed sections */}
+            {selectedListId !== 'completed' && <TaskForm />}
           </div>
         ) : (
           <div className="space-y-3">

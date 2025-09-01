@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/useAppStore';
 import { ListManager } from './ListManager';
 import { BrandLogo } from './BrandLogo';
+import { format } from 'date-fns';
 
 interface SidebarProps {
   currentView: string;
@@ -236,6 +237,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView })
                         return dueDate >= weekStart && dueDate <= weekEnd;
                       }).length}
                     </Badge>
+                  </>
+                )}
+              </Button>
+
+              <Button
+                variant={selectedListId === 'completed' ? "secondary" : "ghost"}
+                size={collapsed ? "icon" : "default"}
+                className={cn(
+                  "w-full justify-start gap-3 h-10 hover:bg-secondary/50 transition-colors",
+                  selectedListId === 'completed' && "bg-secondary text-secondary-foreground"
+                )}
+                onClick={() => handleListClick('completed')}
+              >
+                <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                {!collapsed && (
+                  <>
+                    <span className="flex-1 text-left">Completed</span>
+                    {tasks.filter(t => t.status === 'completed' && t.completedAt && format(new Date(t.completedAt), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')).length > 0 && (
+                      <Badge variant="secondary" className="ml-auto text-xs bg-success/20 text-success">
+                        {tasks.filter(t => t.status === 'completed' && t.completedAt && format(new Date(t.completedAt), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')).length}
+                      </Badge>
+                    )}
                   </>
                 )}
               </Button>

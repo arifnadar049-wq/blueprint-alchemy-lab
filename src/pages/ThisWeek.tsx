@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, CheckCircle2, Clock, BarChart3, ArrowLeft } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock, BarChart3, ArrowLeft, Plus } from 'lucide-react';
+import { TaskForm } from '@/components/TaskForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils';
 const ThisWeek = () => {
   const { tasks, initializeStore } = useAppStore();
   const [sessions, setSessions] = useState<any[]>([]);
+  const [showTaskForm, setShowTaskForm] = useState(false);
   
   // Enable real-time updates
   useRealTimeUpdates();
@@ -105,9 +107,18 @@ const ThisWeek = () => {
               {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
             </p>
           </div>
-          <Badge variant="secondary" className="bg-gradient-primary text-primary-foreground">
-            This Week
-          </Badge>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => setShowTaskForm(true)} 
+              className="gap-2 bg-gradient-primary hover:opacity-90 shadow-medium hover:shadow-elegant transition-all"
+            >
+              <Plus className="h-4 w-4" />
+              Add Task
+            </Button>
+            <Badge variant="secondary" className="bg-gradient-primary text-primary-foreground">
+              This Week
+            </Badge>
+          </div>
         </div>
       </div>
 
@@ -247,6 +258,11 @@ const ThisWeek = () => {
             </Card>
           ))}
         </div>
+
+        {/* Add Task Form */}
+        {showTaskForm && (
+          <TaskForm onClose={() => setShowTaskForm(false)} />
+        )}
       </div>
     </div>
   );

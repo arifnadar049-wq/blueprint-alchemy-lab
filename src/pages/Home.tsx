@@ -30,101 +30,84 @@ const Home = () => {
             </p>
           </div>
 
-          {/* Main Navigation Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mt-12 max-w-3xl mx-auto">
+          {/* Primary Navigation Cards */}
+          <div className="grid md:grid-cols-3 gap-8 mt-12 max-w-4xl mx-auto">
             <Card 
-              className="p-8 bg-card/80 backdrop-blur-md border hover:shadow-elegant transition-all duration-300 cursor-pointer hover:scale-105"
+              className="p-10 bg-card/90 backdrop-blur-lg border hover:shadow-glow transition-all duration-500 cursor-pointer group hover:scale-110 hover:-translate-y-2"
               onClick={() => navigate('/app?view=tasks')}
             >
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-subtle rounded-2xl flex items-center justify-center mx-auto">
-                  <CheckSquare className="h-8 w-8 text-primary" />
+              <div className="text-center space-y-5">
+                <div className="w-20 h-20 bg-gradient-primary rounded-3xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
+                  <CheckSquare className="h-10 w-10 text-primary-foreground" />
                 </div>
-                <h3 className="text-xl font-semibold">Tasks</h3>
-                <p className="text-muted-foreground">
-                  Organize and track your daily tasks with powerful productivity tools
+                <h3 className="text-2xl font-bold text-foreground">Check Tasklist</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Organize and prioritize your tasks with intelligent productivity features
                 </p>
-                <Button size="lg" className="w-full">
-                  Get Started
+                <Button size="lg" className="w-full bg-gradient-primary hover:opacity-90 transition-opacity">
+                  View Tasks
                 </Button>
               </div>
             </Card>
 
             <Card 
-              className="p-8 bg-card/80 backdrop-blur-md border hover:shadow-elegant transition-all duration-300 cursor-pointer hover:scale-105"
+              className="p-10 bg-card/90 backdrop-blur-lg border hover:shadow-glow transition-all duration-500 cursor-pointer group hover:scale-110 hover:-translate-y-2"
               onClick={() => navigate('/app?view=habits')}
             >
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-subtle rounded-2xl flex items-center justify-center mx-auto">
-                  <Target className="h-8 w-8 text-primary" />
+              <div className="text-center space-y-5">
+                <div className="w-20 h-20 bg-gradient-primary rounded-3xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
+                  <Target className="h-10 w-10 text-primary-foreground" />
                 </div>
-                <h3 className="text-xl font-semibold">Habits</h3>
-                <p className="text-muted-foreground">
-                  Build lasting habits and track your progress with smart insights
+                <h3 className="text-2xl font-bold text-foreground">Track Habits</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Build lasting habits and monitor your consistency with visual insights
                 </p>
-                <Button size="lg" className="w-full">
-                  Build Habits
+                <Button size="lg" className="w-full bg-gradient-primary hover:opacity-90 transition-opacity">
+                  Track Progress
                 </Button>
               </div>
             </Card>
 
             <Card 
-              className="p-8 bg-card/80 backdrop-blur-md border hover:shadow-elegant transition-all duration-300 cursor-pointer hover:scale-105"
+              className="p-10 bg-card/90 backdrop-blur-lg border hover:shadow-glow transition-all duration-500 cursor-pointer group hover:scale-110 hover:-translate-y-2"
               onClick={() => navigate('/app?view=reports')}
             >
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-subtle rounded-2xl flex items-center justify-center mx-auto">
-                  <BarChart3 className="h-8 w-8 text-primary" />
+              <div className="text-center space-y-5">
+                <div className="w-20 h-20 bg-gradient-primary rounded-3xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
+                  <BarChart3 className="h-10 w-10 text-primary-foreground" />
                 </div>
-                <h3 className="text-xl font-semibold">Reports</h3>
-                <p className="text-muted-foreground">
-                  Analyze your productivity patterns and optimize your performance
+                <h3 className="text-2xl font-bold text-foreground">Check Report</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Analyze performance metrics and optimize your productivity patterns
                 </p>
-                <Button size="lg" className="w-full">
-                  View Reports
+                <Button size="lg" className="w-full bg-gradient-primary hover:opacity-90 transition-opacity">
+                  View Analytics
                 </Button>
               </div>
             </Card>
           </div>
 
-          {/* Quick Access */}
-          <div className="mt-12 pt-8 border-t border-border/20">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 justify-center">
+          {/* Secondary Quick Access */}
+          <div className="mt-16 pt-8 border-t border-border/30">
+            <h3 className="text-lg font-semibold text-center text-foreground mb-8">Quick Access</h3>
+            <div className="flex justify-center gap-6 max-w-2xl mx-auto">
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="gap-3 bg-card/50 backdrop-blur-md hover:scale-105 transition-all duration-300"
-                onClick={() => navigate('/today')}
-              >
-                <Clock className="h-5 w-5" />
-                Today's Focus
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="gap-3 bg-card/50 backdrop-blur-md hover:scale-105 transition-all duration-300"
+                className="gap-3 bg-card/60 backdrop-blur-lg hover:scale-110 hover:shadow-elegant transition-all duration-300 border-primary/20 hover:border-primary/40"
                 onClick={() => navigate('/pomodoro')}
               >
-                <Target className="h-5 w-5" />
-                Pomodoro Timer
+                <Clock className="h-5 w-5" />
+                Pomodoro
               </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="gap-3 bg-card/50 backdrop-blur-md hover:scale-105 transition-all duration-300"
+                className="gap-3 bg-card/60 backdrop-blur-lg hover:scale-110 hover:shadow-elegant transition-all duration-300 border-primary/20 hover:border-primary/40"
                 onClick={() => navigate('/app?view=calendar')}
               >
                 <Calendar className="h-5 w-5" />
                 Calendar
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="gap-3 bg-card/50 backdrop-blur-md hover:scale-105 transition-all duration-300"
-                onClick={() => navigate('/profile')}
-              >
-                <User className="h-5 w-5" />
-                Profile
               </Button>
             </div>
           </div>
