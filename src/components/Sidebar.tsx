@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Settings as SettingsIcon, BarChart3, Inbox, Calendar, CalendarDays, CheckCircle, MoreHorizontal, Edit2, Activity, User } from 'lucide-react';
+import { Plus, Settings as SettingsIcon, BarChart3, Inbox, Calendar, CalendarDays, CheckCircle, MoreHorizontal, Edit2, Activity, User, CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -96,6 +96,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView })
               {!collapsed && "Habits"}
             </Button>
             
+            <Button
+              variant={currentView === 'calendar' ? "secondary" : "ghost"}
+              size={collapsed ? "icon" : "default"}
+              className={cn(
+                "w-full justify-start gap-3 hover:bg-secondary/50 transition-colors",
+                currentView === 'calendar' && "bg-secondary text-secondary-foreground"
+              )}
+              onClick={() => setCurrentView('calendar')}
+            >
+              <CalendarIcon className="h-4 w-4" />
+              {!collapsed && "Calendar"}
+            </Button>
+
             <Button
               variant={currentView === 'reports' ? "secondary" : "ghost"}
               size={collapsed ? "icon" : "default"}

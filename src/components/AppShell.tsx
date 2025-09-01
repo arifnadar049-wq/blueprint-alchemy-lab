@@ -8,6 +8,7 @@ import { NotificationSystem } from './NotificationSystem';
 import { Reports } from './Reports';
 import { Settings } from './Settings';
 import { Habits } from './Habits';
+import { Calendar } from './Calendar';
 
 export const AppShell = () => {
   const [currentView, setCurrentView] = useState('tasks');
@@ -18,6 +19,8 @@ export const AppShell = () => {
         return <MainWorkspace />;
       case 'habits':
         return <Habits />;
+      case 'calendar':
+        return <Calendar />;
       case 'reports':
         return <Reports />;
       case 'settings':

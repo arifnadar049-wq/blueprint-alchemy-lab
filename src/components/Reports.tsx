@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, Clock, Target, TrendingUp, Calendar, Activity, Flame, Download } from 'lucide-react';
+import { BarChart3, Clock, Target, TrendingUp, Calendar, Activity, Flame, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,8 +21,11 @@ import {
   Tooltip,
   ResponsiveContainer,
   LineChart,
-  Line
+  Line,
+  Area,
+  AreaChart
 } from 'recharts';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, subMonths, addMonths, parseISO } from 'date-fns';
 
 type TimeRange = 'daily' | 'weekly' | 'monthly';
 
@@ -30,7 +33,8 @@ export const Reports = () => {
   const { tasks, sessions } = useAppStore();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [completions, setCompletions] = useState<HabitCompletion[]>([]);
-  const [timeRange, setTimeRange] = useState<TimeRange>('weekly');
+  const [timeRange, setTimeRange] = useState<TimeRange>('monthly'); // Default to monthly
+  const [selectedMonth, setSelectedMonth] = useState(new Date()); // Track selected month
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -82,7 +86,21 @@ export const Reports = () => {
   const habitCompletionRate = habits.length > 0 ? 
     Math.round((completedHabitsToday / habits.length) * 100) : 0;
 
-  // Generate charts data
+  // Month navigation functions
+  const goToPreviousMonth = () => {
+    setSelectedMonth(prev => subMonths(prev, 1));
+  };
+
+  const goToNextMonth = () => {
+    setSelectedMonth(prev => addMonths(prev, 1));
+  };
+
+  const isCurrentMonth = () => {
+    const now = new Date();
+    return selectedMonth.getMonth() === now.getMonth() && selectedMonth.getFullYear() === now.getFullYear();
+  };
+
+  // Generate charts data based on selected time range and month
   const getDateRange = () => {
     const end = new Date();
     const start = new Date();
@@ -95,8 +113,11 @@ export const Reports = () => {
         start.setDate(end.getDate() - 27); // Last 4 weeks
         break;
       case 'monthly':
-        start.setMonth(end.getMonth() - 5); // Last 6 months
-        break;
+        // Use selected month for monthly view
+        return {
+          start: startOfMonth(selectedMonth),
+          end: endOfMonth(selectedMonth)
+        };
     }
     
     return { start, end };
@@ -134,32 +155,82 @@ export const Reports = () => {
     };
   });
 
-  // Weekly progress trend
-  const weeklyData = [];
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toDateString();
-    
-    const dayTasks = completedTasks.filter(task => {
-      const taskDate = new Date(task.updatedAt);
-      return taskDate.toDateString() === dateStr;
-    }).length;
-    
-    const dayHabits = habits.filter(habit => {
-      const dayCompletions = completions.filter(c => 
-        c.habitId === habit.id && 
-        new Date(c.date).toDateString() === dateStr
-      ).length;
-      return dayCompletions >= habit.targetCount;
-    }).length;
-    
-    weeklyData.push({
-      day: date.toLocaleDateString('en', { weekday: 'short' }),
-      tasks: dayTasks,
-      habits: dayHabits
-    });
-  }
+  // Progress trend data based on time range
+  const getProgressTrendData = () => {
+    if (timeRange === 'monthly') {
+      // Monthly view: show daily data for the selected month
+      const monthStart = startOfMonth(selectedMonth);
+      const monthEnd = endOfMonth(selectedMonth);
+      const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+      
+      return daysInMonth.map(date => {
+        const dateStr = date.toDateString();
+        
+        const dayTasks = completedTasks.filter(task => {
+          if (!task.completedAt) return false;
+          const taskDate = new Date(task.completedAt);
+          return taskDate.toDateString() === dateStr;
+        }).length;
+        
+        const dayHabits = habits.filter(habit => {
+          const dayCompletions = completions.filter(c => 
+            c.habitId === habit.id && 
+            new Date(c.date).toDateString() === dateStr
+          ).length;
+          return dayCompletions >= habit.targetCount;
+        }).length;
+
+        const daySessions = sessions.filter(session => {
+          const sessionDate = new Date(session.startedAt);
+          return sessionDate.toDateString() === dateStr;
+        });
+
+        const dayProductiveMinutes = daySessions.reduce((total, session) => 
+          total + (session.workSeconds / 60), 0
+        );
+        
+        return {
+          date: format(date, 'MMM d'),
+          day: format(date, 'd'),
+          tasks: dayTasks,
+          habits: dayHabits,
+          productiveHours: Math.round((dayProductiveMinutes / 60) * 10) / 10
+        };
+      });
+    } else {
+      // Weekly view: show last 7 days
+      const weeklyData = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toDateString();
+        
+        const dayTasks = completedTasks.filter(task => {
+          if (!task.completedAt) return false;
+          const taskDate = new Date(task.completedAt);
+          return taskDate.toDateString() === dateStr;
+        }).length;
+        
+        const dayHabits = habits.filter(habit => {
+          const dayCompletions = completions.filter(c => 
+            c.habitId === habit.id && 
+            new Date(c.date).toDateString() === dateStr
+          ).length;
+          return dayCompletions >= habit.targetCount;
+        }).length;
+        
+        weeklyData.push({
+          date: format(date, 'MMM d'),
+          day: date.toLocaleDateString('en', { weekday: 'short' }),
+          tasks: dayTasks,
+          habits: dayHabits
+        });
+      }
+      return weeklyData;
+    }
+  };
+
+  const progressTrendData = getProgressTrendData();
   
   const exportChartsToCSV = () => {
     try {
@@ -175,10 +246,15 @@ export const Reports = () => {
         ...habitProgressData.map(item => [item.name, item.rate])
       ].map(row => row.join(',')).join('\n');
       
-      // Weekly trend data
-      const weeklyCSV = [
-        ['Day', 'Tasks Completed', 'Habits Completed'],
-        ...weeklyData.map(item => [item.day, item.tasks, item.habits])
+      // Progress trend data
+      const trendCSV = [
+        ['Period', 'Tasks Completed', 'Habits Completed', 'Productive Hours'],
+        ...progressTrendData.map(item => [
+          item.date || item.day, 
+          item.tasks, 
+          item.habits, 
+          item.productiveHours || 0
+        ])
       ].map(row => row.join(',')).join('\n');
       
       // Combine all data
@@ -189,8 +265,8 @@ export const Reports = () => {
         'HABIT COMPLETION REPORT', 
         habitCSV,
         '',
-        'WEEKLY TREND REPORT',
-        weeklyCSV
+        `${timeRange.toUpperCase()} TREND REPORT`,
+        trendCSV
       ].join('\n');
       
       const blob = new Blob([fullCSV], { type: 'text/csv' });
@@ -232,7 +308,27 @@ export const Reports = () => {
           <h1 className="text-2xl font-semibold text-foreground">Reports & Analytics</h1>
           <p className="text-muted-foreground">Track your productivity and identify patterns</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {/* Month Navigation for Monthly View */}
+          {timeRange === 'monthly' && (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={goToPreviousMonth}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm font-medium min-w-[120px] text-center">
+                {format(selectedMonth, 'MMMM yyyy')}
+              </span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={goToNextMonth}
+                disabled={isCurrentMonth()}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+          
           <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
             <SelectTrigger className="w-32">
               <SelectValue />
@@ -348,10 +444,12 @@ export const Reports = () => {
         </Card>
       </div>
 
-      {/* Weekly Progress Trend */}
+      {/* Progress Trend */}
       <Card className="p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-foreground">Weekly Progress Trend</h3>
+          <h3 className="text-lg font-medium text-foreground">
+            {timeRange === 'monthly' ? `${format(selectedMonth, 'MMMM yyyy')} Progress Trend` : 'Weekly Progress Trend'}
+          </h3>
           <Button 
             variant="outline" 
             size="sm" 
@@ -363,14 +461,33 @@ export const Reports = () => {
           </Button>
         </div>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={weeklyData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="day" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="tasks" stroke="#3b82f6" name="Tasks Completed" />
-            <Line type="monotone" dataKey="habits" stroke="#10b981" name="Habits Completed" />
-          </LineChart>
+          {timeRange === 'monthly' ? (
+            <AreaChart data={progressTrendData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="day" />
+              <YAxis />
+              <Tooltip 
+                labelFormatter={(value) => `Day ${value}`}
+                formatter={(value, name) => [
+                  value, 
+                  name === 'tasks' ? 'Tasks Completed' : 
+                  name === 'habits' ? 'Habits Completed' : 'Productive Hours'
+                ]}
+              />
+              <Area type="monotone" dataKey="tasks" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
+              <Area type="monotone" dataKey="habits" stackId="2" stroke="#10b981" fill="#10b981" fillOpacity={0.6} />
+              <Line type="monotone" dataKey="productiveHours" stroke="#f59e0b" strokeWidth={2} name="Productive Hours" />
+            </AreaChart>
+          ) : (
+            <LineChart data={progressTrendData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="day" />
+              <YAxis />
+              <Tooltip />
+              <Line type="monotone" dataKey="tasks" stroke="#3b82f6" name="Tasks Completed" />
+              <Line type="monotone" dataKey="habits" stroke="#10b981" name="Habits Completed" />
+            </LineChart>
+          )}
         </ResponsiveContainer>
       </Card>
 
