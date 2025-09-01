@@ -14,7 +14,202 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      habit_completions: {
+        Row: {
+          completed_at: string
+          created_at: string
+          date: string
+          habit_id: string
+          id: string
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string
+          date: string
+          habit_id: string
+          id?: string
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string
+          date?: string
+          habit_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_completions_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habits: {
+        Row: {
+          color: string
+          created_at: string
+          frequency: string
+          icon: string
+          id: string
+          name: string
+          target_count: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          frequency?: string
+          icon?: string
+          id?: string
+          name: string
+          target_count?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          frequency?: string
+          icon?: string
+          id?: string
+          name?: string
+          target_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lists: {
+        Row: {
+          color: string
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pomodoro_sessions: {
+        Row: {
+          break_seconds: number
+          created_at: string
+          ended_at: string | null
+          id: string
+          started_at: string
+          task_id: string | null
+          work_seconds: number
+        }
+        Insert: {
+          break_seconds?: number
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          task_id?: string | null
+          work_seconds?: number
+        }
+        Update: {
+          break_seconds?: number
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          task_id?: string | null
+          work_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pomodoro_sessions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          name: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          estimate_minutes: number | null
+          id: string
+          list_id: string | null
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          estimate_minutes?: number | null
+          id?: string
+          list_id?: string | null
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          estimate_minutes?: number | null
+          id?: string
+          list_id?: string | null
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

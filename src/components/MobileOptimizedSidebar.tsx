@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Settings, BarChart3, Inbox, Calendar, CalendarDays, CheckCircle, MoreHorizontal, Edit2, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Settings, BarChart3, Inbox, Calendar, CalendarDays, CheckCircle, MoreHorizontal, Edit2, Menu, X, ChevronLeft, ChevronRight, User, Clock, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -167,6 +167,33 @@ export const MobileOptimizedSidebar = ({ onNavigate, currentView }: MobileOptimi
 
         {/* Navigation */}
         <div className="space-y-1">
+          <Button
+            variant="ghost"
+            size={collapsed && !isMobile ? "icon" : "default"}
+            className="w-full justify-start gap-3"
+            onClick={() => window.location.href = '/profile'}
+          >
+            <User className="h-4 w-4" />
+            {(!collapsed || isMobile) && "Profile"}
+          </Button>
+          <Button
+            variant="ghost"
+            size={collapsed && !isMobile ? "icon" : "default"}
+            className="w-full justify-start gap-3"
+            onClick={() => window.location.href = '/today'}
+          >
+            <Clock className="h-4 w-4" />
+            {(!collapsed || isMobile) && "Today"}
+          </Button>
+          <Button
+            variant="ghost"
+            size={collapsed && !isMobile ? "icon" : "default"}
+            className="w-full justify-start gap-3"
+            onClick={() => window.location.href = '/this-week'}
+          >
+            <Target className="h-4 w-4" />
+            {(!collapsed || isMobile) && "This Week"}
+          </Button>
           <Button
             variant={currentView === 'reports' ? "secondary" : "ghost"}
             size={collapsed && !isMobile ? "icon" : "default"}
