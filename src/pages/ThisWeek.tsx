@@ -8,10 +8,15 @@ import { useAppStore } from '@/store/useAppStore';
 import { supabase } from '@/integrations/supabase/client';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isToday, isSameDay } from 'date-fns';
 import { Task, TaskStatus } from '@/types';
+import { useRealTimeUpdates } from '@/components/RealTimeDashboard';
+import { cn } from '@/lib/utils';
 
 const ThisWeek = () => {
   const { tasks, initializeStore } = useAppStore();
   const [sessions, setSessions] = useState<any[]>([]);
+  
+  // Enable real-time updates
+  useRealTimeUpdates();
 
   useEffect(() => {
     loadData();
@@ -81,65 +86,71 @@ const ThisWeek = () => {
   const weekCompletionRate = weekTotals.totalTasks > 0 ? (weekTotals.completedTasks / weekTotals.totalTasks) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-surface p-6 overflow-y-auto">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
+    <div className="min-h-screen bg-background animate-fade-in">
+      {/* Header */}
+      <div className="bg-card border-b border-border p-6">
         <div className="flex items-center justify-between">
-          <Button variant="outline" onClick={() => window.location.href = '/'} className="gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => window.location.href = '/'} 
+            className="gap-2 text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-4 w-4" />
             Home
           </Button>
           <div className="flex-1 text-center">
-            <h1 className="text-3xl font-bold flex items-center justify-center gap-3">
-              <Calendar className="h-8 w-8 text-primary" />
-              This Week Overview
-            </h1>
+            <h1 className="text-2xl font-bold text-foreground">This Week Overview</h1>
             <p className="text-muted-foreground">
               {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
             </p>
           </div>
-          <div className="w-20"></div>
+          <Badge variant="secondary" className="bg-gradient-primary text-primary-foreground">
+            This Week
+          </Badge>
         </div>
+      </div>
 
+      <div className="p-6 space-y-6 animate-scale-in">
         {/* Week Summary */}
         <div className="grid md:grid-cols-4 gap-4">
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
             <CardContent className="pt-6">
               <div className="text-center space-y-2">
                 <CheckCircle2 className="h-8 w-8 text-primary mx-auto" />
-                <div className="text-2xl font-bold">{weekTotals.completedTasks}</div>
+                <div className="text-2xl font-bold text-foreground">{weekTotals.completedTasks}</div>
                 <div className="text-sm text-muted-foreground">Tasks Completed</div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
             <CardContent className="pt-6">
               <div className="text-center space-y-2">
-                <Clock className="h-8 w-8 text-primary mx-auto" />
-                <div className="text-2xl font-bold">{weekTotals.pendingTasks}</div>
+                <Clock className="h-8 w-8 text-accent mx-auto" />
+                <div className="text-2xl font-bold text-foreground">{weekTotals.pendingTasks}</div>
                 <div className="text-sm text-muted-foreground">Tasks Remaining</div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
             <CardContent className="pt-6">
               <div className="text-center space-y-2">
-                <BarChart3 className="h-8 w-8 text-primary mx-auto" />
-                <div className="text-2xl font-bold">{weekTotals.productiveHours.toFixed(1)}h</div>
+                <BarChart3 className="h-8 w-8 text-success mx-auto" />
+                <div className="text-2xl font-bold text-foreground">{weekTotals.productiveHours.toFixed(1)}h</div>
                 <div className="text-sm text-muted-foreground">Productive Time</div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
             <CardContent className="pt-6">
               <div className="text-center space-y-2">
                 <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center mx-auto">
                   <span className="text-primary-foreground font-bold text-sm">%</span>
                 </div>
-                <div className="text-2xl font-bold">{Math.round(weekCompletionRate)}%</div>
+                <div className="text-2xl font-bold text-foreground">{Math.round(weekCompletionRate)}%</div>
                 <div className="text-sm text-muted-foreground">Completion Rate</div>
               </div>
             </CardContent>
@@ -147,15 +158,15 @@ const ThisWeek = () => {
         </div>
 
         {/* Week Progress */}
-        <Card>
+        <Card className="bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
           <CardHeader>
-            <CardTitle>Week Progress</CardTitle>
+            <CardTitle className="text-foreground">Week Progress</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Overall Completion</span>
-                <span>{weekTotals.completedTasks}/{weekTotals.totalTasks} tasks</span>
+                <span className="text-muted-foreground">Overall Completion</span>
+                <span className="text-foreground">{weekTotals.completedTasks}/{weekTotals.totalTasks} tasks</span>
               </div>
               <Progress value={weekCompletionRate} className="h-3" />
             </div>
@@ -165,11 +176,17 @@ const ThisWeek = () => {
         {/* Daily Breakdown */}
         <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {weekStats.map((dayStats, index) => (
-            <Card key={index} className={isToday(dayStats.date) ? 'ring-2 ring-primary/20' : ''}>
+            <Card 
+              key={index} 
+              className={cn(
+                "bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300",
+                isToday(dayStats.date) && "ring-2 ring-primary/20 bg-primary/5"
+              )}
+            >
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center justify-between text-foreground">
                   <span>{format(dayStats.date, 'EEEE')}</span>
-                  {isToday(dayStats.date) && <Badge variant="secondary">Today</Badge>}
+                  {isToday(dayStats.date) && <Badge variant="secondary" className="bg-primary/20 text-primary">Today</Badge>}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">{format(dayStats.date, 'MMM d')}</p>
               </CardHeader>
@@ -189,15 +206,15 @@ const ThisWeek = () => {
                 {/* Progress */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span>Progress</span>
-                    <span>{Math.round(dayStats.completionRate)}%</span>
+                    <span className="text-muted-foreground">Progress</span>
+                    <span className="text-foreground">{Math.round(dayStats.completionRate)}%</span>
                   </div>
                   <Progress value={dayStats.completionRate} className="h-1" />
                 </div>
 
                 {/* Productive Time */}
                 <div className="text-center">
-                  <div className="text-sm font-medium">{dayStats.productiveHours.toFixed(1)}h</div>
+                  <div className="text-sm font-medium text-foreground">{dayStats.productiveHours.toFixed(1)}h</div>
                   <div className="text-xs text-muted-foreground">Productive Time</div>
                 </div>
 
@@ -209,7 +226,7 @@ const ThisWeek = () => {
                         task.status === TaskStatus.COMPLETED ? 'bg-primary' : 'bg-muted-foreground'
                       }`} />
                       <span className={`flex-1 truncate ${
-                        task.status === TaskStatus.COMPLETED ? 'line-through text-muted-foreground' : ''
+                        task.status === TaskStatus.COMPLETED ? 'line-through text-muted-foreground' : 'text-foreground'
                       }`}>
                         {task.title}
                       </span>

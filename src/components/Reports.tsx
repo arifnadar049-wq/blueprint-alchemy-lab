@@ -302,7 +302,7 @@ export const Reports = () => {
   }
 
   return (
-    <div className="p-6 overflow-y-auto">
+    <div className="p-6 overflow-y-auto bg-background animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Reports & Analytics</h1>
@@ -315,7 +315,7 @@ export const Reports = () => {
               <Button variant="outline" size="sm" onClick={goToPreviousMonth}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="text-sm font-medium min-w-[120px] text-center">
+              <span className="text-sm font-medium min-w-[120px] text-center text-foreground">
                 {format(selectedMonth, 'MMMM yyyy')}
               </span>
               <Button 
@@ -328,6 +328,11 @@ export const Reports = () => {
               </Button>
             </div>
           )}
+          
+          <Button onClick={exportChartsToCSV} variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            Export CSV
+          </Button>
           
           <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
             <SelectTrigger className="w-32">
@@ -343,52 +348,52 @@ export const Reports = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-scale-in">
+        <Card className="p-6 bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Tasks Today</p>
               <p className="text-2xl font-bold text-foreground">{todayTasks.length}</p>
             </div>
-            <Calendar className="h-8 w-8 text-blue-500" />
+            <Target className="h-8 w-8 text-primary" />
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Habits Today</p>
-              <p className="text-2xl font-bold text-foreground">{completedHabitsToday}/{habits.length}</p>
-            </div>
-            <Activity className="h-8 w-8 text-green-500" />
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Time</p>
-              <p className="text-2xl font-bold text-foreground">{formatDuration(totalMinutesWorked)}</p>
-            </div>
-            <Clock className="h-8 w-8 text-purple-500" />
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Habit Rate</p>
+              <p className="text-sm font-medium text-muted-foreground">Habits Progress</p>
               <p className="text-2xl font-bold text-foreground">{habitCompletionRate}%</p>
             </div>
-            <Flame className="h-8 w-8 text-orange-500" />
+            <Activity className="h-8 w-8 text-accent" />
+          </div>
+        </Card>
+
+        <Card className="p-6 bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Focus Sessions</p>
+              <p className="text-2xl font-bold text-foreground">{totalSessions}</p>
+            </div>
+            <Clock className="h-8 w-8 text-success" />
+          </div>
+        </Card>
+
+        <Card className="p-6 bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Avg Task Time</p>
+              <p className="text-2xl font-bold text-foreground">{averageTaskTime}m</p>
+            </div>
+            <TrendingUp className="h-8 w-8 text-warning" />
           </div>
         </Card>
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 animate-scale-in">
         {/* Task Status Pie Chart */}
-        <Card className="p-6">
+        <Card className="p-6 bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
           <h3 className="text-lg font-medium text-foreground mb-4">Task Status Distribution</h3>
           {taskStatusData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -417,7 +422,7 @@ export const Reports = () => {
         </Card>
 
         {/* Habits Progress */}
-        <Card className="p-6">
+        <Card className="p-6 bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
           <h3 className="text-lg font-medium text-foreground mb-4">Habit Completion Rates</h3>
           {habitProgressData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -445,7 +450,7 @@ export const Reports = () => {
       </div>
 
       {/* Progress Trend */}
-      <Card className="p-6 mb-8">
+      <Card className="p-6 mb-8 bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-foreground">
             {timeRange === 'monthly' ? `${format(selectedMonth, 'MMMM yyyy')} Progress Trend` : 'Weekly Progress Trend'}
@@ -492,7 +497,7 @@ export const Reports = () => {
       </Card>
 
       {/* Recent Activity */}
-      <Card className="p-6">
+      <Card className="p-6 bg-card/50 backdrop-blur-sm border-border hover:shadow-medium transition-all duration-300">
         <h3 className="text-lg font-medium text-foreground mb-4">Recent Activity</h3>
         {sessions.length === 0 ? (
           <div className="text-center py-8">

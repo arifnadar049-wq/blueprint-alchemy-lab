@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format, parseISO, startOfDay, endOfDay } from 'date-fns';
 import { Task, Habit, TaskStatus } from '@/types';
+import { TaskForm } from './TaskForm';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const localizer = momentLocalizer(moment);
@@ -51,6 +52,7 @@ export const Calendar = () => {
   const [date, setDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showEventDialog, setShowEventDialog] = useState(false);
+  const [showTaskForm, setShowTaskForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -254,6 +256,12 @@ export const Calendar = () => {
           </div>
           
           <div className="flex items-center gap-2">
+            {/* Add Task Button */}
+            <Button variant="outline" size="sm" onClick={() => setShowTaskForm(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add Task
+            </Button>
+            
             {/* Google Calendar Controls */}
             {googleSettings.connected ? (
               <div className="flex items-center gap-2">
@@ -473,6 +481,13 @@ export const Calendar = () => {
           border-color: hsl(var(--border));
         }
       `}</style>
+      
+      {/* Task Form Dialog */}
+      {showTaskForm && (
+        <TaskForm
+          onClose={() => setShowTaskForm(false)}
+        />
+      )}
     </div>
   );
 };
