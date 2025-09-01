@@ -10,6 +10,7 @@ import PomodoroTimer from "./pages/PomodoroTimer";
 import Today from "./pages/Today";
 import ThisWeek from "./pages/ThisWeek";
 import NotFound from "./pages/NotFound";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/pomodoro" element={<PomodoroTimer />} />
           <Route path="/today" element={<Today />} />
           <Route path="/this-week" element={<ThisWeek />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

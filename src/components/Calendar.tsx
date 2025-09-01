@@ -113,33 +113,8 @@ export const Calendar = () => {
       if (error) throw error;
 
       if (data.authUrl) {
-        // Open OAuth URL in new window
-        window.open(data.authUrl, 'google-auth', 'width=500,height=600');
-        
-        // Listen for OAuth completion
-        const handleAuth = (event: MessageEvent) => {
-          if (event.origin !== window.location.origin) return;
-          
-          if (event.data.type === 'google-auth-success') {
-            saveGoogleSettings({
-              ...googleSettings,
-              connected: true,
-              email: event.data.email,
-              lastSync: new Date().toISOString()
-            });
-            
-            syncGoogleCalendar();
-            toast.success('Google Calendar connected successfully!');
-            window.removeEventListener('message', handleAuth);
-          }
-          
-          if (event.data.type === 'google-auth-error') {
-            toast.error('Failed to connect Google Calendar');
-            window.removeEventListener('message', handleAuth);
-          }
-        };
-        
-        window.addEventListener('message', handleAuth);
+        // Open OAuth URL in current window
+        window.location.href = data.authUrl;
       }
     } catch (error) {
       console.error('Error connecting Google Calendar:', error);
@@ -152,17 +127,32 @@ export const Calendar = () => {
   const syncGoogleCalendar = async () => {
     if (!googleSettings.connected) return;
     
+    const tokens = JSON.parse(localStorage.getItem('googleTokens') || '{}');
+    if (!tokens.access_token) {
+      toast.error('Please reconnect your Google Calendar');
+      return;
+    }
+    
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('google-calendar-sync', {
         body: { 
           action: 'sync',
           startDate: startOfDay(new Date()).toISOString(),
-          endDate: endOfDay(new Date(date.getFullYear(), date.getMonth() + 1, 0)).toISOString()
+          endDate: endOfDay(new Date(date.getFullYear(), date.getMonth() + 1, 0)).toISOString(),
+          accessToken: tokens.access_token
         }
       });
 
       if (error) throw error;
+
+      if (data.needsReauth) {
+        // Token expired, need to reconnect
+        saveGoogleSettings({ ...googleSettings, connected: false });
+        localStorage.removeItem('googleTokens');
+        toast.error('Google Calendar access expired. Please reconnect.');
+        return;
+      }
 
       const events = data.events?.map((event: any) => ({
         id: event.id,
@@ -181,7 +171,7 @@ export const Calendar = () => {
         lastSync: new Date().toISOString()
       });
       
-      toast.success('Google Calendar synced successfully!');
+      toast.success(`Synced ${events.length} Google Calendar events`);
     } catch (error) {
       console.error('Error syncing Google Calendar:', error);
       toast.error('Failed to sync Google Calendar');
@@ -189,6 +179,13 @@ export const Calendar = () => {
       setLoading(false);
     }
   };
+
+  // Auto-sync if enabled
+  useEffect(() => {
+    if (googleSettings.connected && googleSettings.autoSync) {
+      syncGoogleCalendar();
+    }
+  }, [date, googleSettings.connected, googleSettings.autoSync]);
 
   // Convert tasks to calendar events
   const taskEvents: CalendarEvent[] = useMemo(() => {

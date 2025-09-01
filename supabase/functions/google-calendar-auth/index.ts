@@ -32,7 +32,7 @@ serve(async (req) => {
       )
     }
 
-    const redirectUri = `${req.headers.get('origin')}/auth/callback`
+    const redirectUri = `${new URL(req.url).origin}/auth/callback`
 
     if (action === 'connect') {
       // Generate OAuth URL
