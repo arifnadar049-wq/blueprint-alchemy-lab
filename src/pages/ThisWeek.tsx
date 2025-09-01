@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, CheckCircle2, Clock, BarChart3 } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock, BarChart3, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -80,17 +81,24 @@ const ThisWeek = () => {
   const weekCompletionRate = weekTotals.totalTasks > 0 ? (weekTotals.completedTasks / weekTotals.totalTasks) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-surface p-6">
+    <div className="min-h-screen bg-gradient-surface p-6 overflow-y-auto">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold flex items-center justify-center gap-3">
-            <Calendar className="h-8 w-8 text-primary" />
-            This Week Overview
-          </h1>
-          <p className="text-muted-foreground">
-            {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
-          </p>
+        <div className="flex items-center justify-between">
+          <Button variant="outline" onClick={() => window.location.href = '/'} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Home
+          </Button>
+          <div className="flex-1 text-center">
+            <h1 className="text-3xl font-bold flex items-center justify-center gap-3">
+              <Calendar className="h-8 w-8 text-primary" />
+              This Week Overview
+            </h1>
+            <p className="text-muted-foreground">
+              {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
+            </p>
+          </div>
+          <div className="w-20"></div>
         </div>
 
         {/* Week Summary */}

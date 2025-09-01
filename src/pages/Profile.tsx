@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Phone, Award, Clock, CheckCircle, TrendingUp, Save } from 'lucide-react';
+import { User, Phone, Award, Clock, CheckCircle, TrendingUp, Save, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -127,15 +127,22 @@ const Profile = () => {
   const stats = getStats();
 
   return (
-    <div className="min-h-screen bg-gradient-surface p-6">
+    <div className="min-h-screen bg-gradient-surface p-6 overflow-y-auto">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-elegant">
-            <User className="h-12 w-12 text-primary-foreground" />
+        <div className="flex items-center justify-between mb-8">
+          <Button variant="outline" onClick={() => window.location.href = '/'} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Home
+          </Button>
+          <div className="flex-1 text-center">
+            <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-elegant">
+              <User className="h-12 w-12 text-primary-foreground" />
+            </div>
+            <h1 className="text-3xl font-bold">Profile</h1>
+            <p className="text-muted-foreground">Manage your profile and view your progress</p>
           </div>
-          <h1 className="text-3xl font-bold">Profile</h1>
-          <p className="text-muted-foreground">Manage your profile and view your progress</p>
+          <div className="w-20"></div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">

@@ -11,7 +11,11 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-surface">
       {/* Hero Section */}
       <div className="relative min-h-screen flex items-center justify-center px-4">
-        <div className="absolute inset-0 bg-gradient-primary opacity-10" />
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-90" 
+          style={{ backgroundImage: `url(/lovable-uploads/4ad9d4d2-d2a9-4e30-a6b4-fb178ecf6031.png)` }}
+        />
+        <div className="absolute inset-0 bg-gradient-primary opacity-20" />
         
         <div className="relative z-10 text-center max-w-4xl mx-auto">
           {/* Logo and Brand */}

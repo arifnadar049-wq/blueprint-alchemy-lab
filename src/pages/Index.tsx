@@ -43,7 +43,7 @@ const Index = () => {
   const SidebarComponent = isMobile ? MobileOptimizedSidebar : Sidebar;
 
   return (
-    <div className="h-screen flex bg-background">
+    <div className="h-screen flex bg-background overflow-hidden">
       <SidebarComponent 
         onNavigate={setCurrentView} 
         currentView={currentView}
@@ -61,7 +61,9 @@ const Index = () => {
             Home
           </Button>
         </div>
-        {renderContent()}
+        <div className="flex-1 overflow-y-auto">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

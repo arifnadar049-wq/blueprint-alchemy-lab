@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Calendar, CheckCircle2, Clock, Target, TrendingUp } from 'lucide-react';
+import { Plus, Calendar, CheckCircle2, Clock, Target, TrendingUp, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -105,7 +105,7 @@ const Today = () => {
   const habitCompletionRate = totalHabits > 0 ? (completedHabits / totalHabits) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-surface p-6">
+    <div className="min-h-screen bg-gradient-surface p-6 overflow-y-auto">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -116,10 +116,16 @@ const Today = () => {
             </h1>
             <p className="text-muted-foreground">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
           </div>
-          <Button onClick={() => setShowTaskForm(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Task
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => window.location.href = '/'} className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Home
+            </Button>
+            <Button onClick={() => setShowTaskForm(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add Task
+            </Button>
+          </div>
         </div>
 
         {/* Daily Dashboard */}
