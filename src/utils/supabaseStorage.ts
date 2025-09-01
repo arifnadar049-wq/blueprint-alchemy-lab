@@ -8,7 +8,7 @@ export const supabaseStorage = {
     const { data, error } = await supabase
       .from('lists')
       .select('*')
-      .order('order', { ascending: true });
+      .order('created_at', { ascending: true });
     
     if (error) {
       console.error('Error fetching lists:', error);
@@ -16,21 +16,31 @@ export const supabaseStorage = {
     }
     
     return data.map(list => ({
-      ...list,
+      id: list.id,
+      name: list.name,
+      color: list.color,
+      icon: list.icon,
+      order: (list as any).order || 0, // Handle potentially missing order field
       createdAt: new Date(list.created_at),
       updatedAt: new Date(list.updated_at)
     }));
   },
 
   saveList: async (list: Omit<List, 'id' | 'createdAt' | 'updatedAt'>): Promise<List | null> => {
+    const insertData: any = {
+      name: list.name,
+      color: list.color,
+      icon: list.icon
+    };
+    
+    // Only add order if it exists
+    if (list.order !== undefined) {
+      insertData.order = list.order;
+    }
+
     const { data, error } = await supabase
       .from('lists')
-      .insert([{
-        name: list.name,
-        color: list.color,
-        icon: list.icon,
-        order: list.order
-      }])
+      .insert([insertData])
       .select()
       .single();
 
@@ -40,21 +50,27 @@ export const supabaseStorage = {
     }
 
     return {
-      ...data,
+      id: data.id,
+      name: data.name,
+      color: data.color,
+      icon: data.icon,
+      order: (data as any).order || 0,
       createdAt: new Date(data.created_at),
       updatedAt: new Date(data.updated_at)
     };
   },
 
   updateList: async (id: string, updates: Partial<List>): Promise<List | null> => {
+    const updateData: any = {};
+    
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.color !== undefined) updateData.color = updates.color;
+    if (updates.icon !== undefined) updateData.icon = updates.icon;
+    if (updates.order !== undefined) updateData.order = updates.order;
+
     const { data, error } = await supabase
       .from('lists')
-      .update({
-        name: updates.name,
-        color: updates.color,
-        icon: updates.icon,
-        order: updates.order
-      })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
@@ -65,7 +81,11 @@ export const supabaseStorage = {
     }
 
     return {
-      ...data,
+      id: data.id,
+      name: data.name,
+      color: data.color,
+      icon: data.icon,
+      order: (data as any).order || 0,
       createdAt: new Date(data.created_at),
       updatedAt: new Date(data.updated_at)
     };
@@ -97,47 +117,71 @@ export const supabaseStorage = {
       return [];
     }
 
-    return data.map(task => ({
-      id: task.id,
-      listId: task.list_id,
-      title: task.title,
-      notes: task.notes || '',
-      estimateMinutes: task.estimate_minutes,
-      dueDate: task.due_date ? new Date(task.due_date) : null,
-      dueTime: task.due_time,
-      status: task.status as TaskStatus,
-      recurrenceRule: task.recurrence_rule,
-      parentRecurringId: task.parent_recurring_id,
-      subtasks: (task.subtasks as unknown as Subtask[]) || [],
-      priority: task.priority || 3,
-      completedAt: task.completed_at ? new Date(task.completed_at) : null,
-      archived: task.archived || false,
-      orderIndex: task.order_index || 0,
-      tags: [], // Will be populated by joins later
-      dependencies: [], // Will be populated by joins later
-      createdAt: new Date(task.created_at),
-      updatedAt: new Date(task.updated_at)
-    }));
+    return data.map(task => {
+      const taskData = task as any;
+      
+      // Handle priority - convert string to number if needed
+      let priority = 3;
+      if (typeof taskData.priority === 'number') {
+        priority = taskData.priority;
+      } else if (typeof taskData.priority === 'string') {
+        switch (taskData.priority) {
+          case 'urgent': priority = 1; break;
+          case 'high': priority = 2; break;
+          case 'medium': priority = 3; break;
+          case 'low': priority = 4; break;
+          case 'lowest': priority = 5; break;
+          default: priority = 3;
+        }
+      }
+
+      return {
+        id: taskData.id,
+        listId: taskData.list_id || '',
+        title: taskData.title,
+        notes: taskData.notes || taskData.description || '',
+        estimateMinutes: taskData.estimate_minutes || null,
+        dueDate: taskData.due_date ? new Date(taskData.due_date) : null,
+        dueTime: taskData.due_time || null,
+        status: taskData.status as TaskStatus,
+        recurrenceRule: taskData.recurrence_rule || null,
+        parentRecurringId: taskData.parent_recurring_id || null,
+        subtasks: taskData.subtasks || [],
+        priority,
+        completedAt: taskData.completed_at ? new Date(taskData.completed_at) : null,
+        archived: taskData.archived || false,
+        orderIndex: taskData.order_index || 0,
+        tags: [], // Will be populated by joins later
+        dependencies: [], // Will be populated by joins later
+        createdAt: new Date(taskData.created_at),
+        updatedAt: new Date(taskData.updated_at)
+      };
+    });
   },
 
   saveTask: async (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Promise<Task | null> => {
+    const insertData: any = {
+      list_id: task.listId,
+      title: task.title,
+      description: task.notes, // Use description as fallback
+      estimate_minutes: task.estimateMinutes,
+      due_date: task.dueDate?.toISOString().split('T')[0] || null,
+      status: task.status,
+      priority: task.priority
+    };
+
+    // Add optional fields if they exist in the schema
+    if (task.notes) insertData.notes = task.notes;
+    if (task.dueTime) insertData.due_time = task.dueTime;
+    if (task.recurrenceRule) insertData.recurrence_rule = task.recurrenceRule;
+    if (task.parentRecurringId) insertData.parent_recurring_id = task.parentRecurringId;
+    if (task.subtasks) insertData.subtasks = JSON.parse(JSON.stringify(task.subtasks));
+    if (task.archived !== undefined) insertData.archived = task.archived;
+    if (task.orderIndex !== undefined) insertData.order_index = task.orderIndex;
+
     const { data, error } = await supabase
       .from('tasks')
-      .insert({
-        list_id: task.listId,
-        title: task.title,
-        notes: task.notes,
-        estimate_minutes: task.estimateMinutes,
-        due_date: task.dueDate?.toISOString().split('T')[0] || null,
-        due_time: task.dueTime,
-        status: task.status,
-        recurrence_rule: task.recurrenceRule,
-        parent_recurring_id: task.parentRecurringId,
-        subtasks: JSON.parse(JSON.stringify(task.subtasks)),
-        priority: task.priority,
-        archived: task.archived,
-        order_index: task.orderIndex
-      })
+      .insert(insertData)
       .select()
       .single();
 
@@ -146,47 +190,67 @@ export const supabaseStorage = {
       return null;
     }
 
+    const taskData = data as any;
+    let priority = 3;
+    if (typeof taskData.priority === 'number') {
+      priority = taskData.priority;
+    } else if (typeof taskData.priority === 'string') {
+      switch (taskData.priority) {
+        case 'urgent': priority = 1; break;
+        case 'high': priority = 2; break;
+        case 'medium': priority = 3; break;
+        case 'low': priority = 4; break;
+        case 'lowest': priority = 5; break;
+        default: priority = 3;
+      }
+    }
+
     return {
-      id: data.id,
-      listId: data.list_id,
-      title: data.title,
-      notes: data.notes || '',
-      estimateMinutes: data.estimate_minutes,
-      dueDate: data.due_date ? new Date(data.due_date) : null,
-      dueTime: data.due_time,
-      status: data.status as TaskStatus,
-      recurrenceRule: data.recurrence_rule,
-      parentRecurringId: data.parent_recurring_id,
-      subtasks: (data.subtasks as unknown as Subtask[]) || [],
-      priority: data.priority || 3,
-      completedAt: data.completed_at ? new Date(data.completed_at) : null,
-      archived: data.archived || false,
-      orderIndex: data.order_index || 0,
-      tags: [], // Will be populated by joins later
-      dependencies: [], // Will be populated by joins later
-      createdAt: new Date(data.created_at),
-      updatedAt: new Date(data.updated_at)
+      id: taskData.id,
+      listId: taskData.list_id || '',
+      title: taskData.title,
+      notes: taskData.notes || taskData.description || '',
+      estimateMinutes: taskData.estimate_minutes || null,
+      dueDate: taskData.due_date ? new Date(taskData.due_date) : null,
+      dueTime: taskData.due_time || null,
+      status: taskData.status as TaskStatus,
+      recurrenceRule: taskData.recurrence_rule || null,
+      parentRecurringId: taskData.parent_recurring_id || null,
+      subtasks: taskData.subtasks || [],
+      priority,
+      completedAt: taskData.completed_at ? new Date(taskData.completed_at) : null,
+      archived: taskData.archived || false,
+      orderIndex: taskData.order_index || 0,
+      tags: [],
+      dependencies: [],
+      createdAt: new Date(taskData.created_at),
+      updatedAt: new Date(taskData.updated_at)
     };
   },
 
   updateTask: async (id: string, updates: Partial<Task>): Promise<Task | null> => {
+    const updateData: any = {};
+    
+    if (updates.listId !== undefined) updateData.list_id = updates.listId;
+    if (updates.title !== undefined) updateData.title = updates.title;
+    if (updates.notes !== undefined) {
+      updateData.notes = updates.notes;
+      updateData.description = updates.notes; // Keep description in sync
+    }
+    if (updates.estimateMinutes !== undefined) updateData.estimate_minutes = updates.estimateMinutes;
+    if (updates.dueDate !== undefined) updateData.due_date = updates.dueDate?.toISOString().split('T')[0] || null;
+    if (updates.dueTime !== undefined) updateData.due_time = updates.dueTime;
+    if (updates.status !== undefined) updateData.status = updates.status;
+    if (updates.recurrenceRule !== undefined) updateData.recurrence_rule = updates.recurrenceRule;
+    if (updates.parentRecurringId !== undefined) updateData.parent_recurring_id = updates.parentRecurringId;
+    if (updates.subtasks !== undefined) updateData.subtasks = JSON.parse(JSON.stringify(updates.subtasks));
+    if (updates.priority !== undefined) updateData.priority = updates.priority;
+    if (updates.archived !== undefined) updateData.archived = updates.archived;
+    if (updates.orderIndex !== undefined) updateData.order_index = updates.orderIndex;
+
     const { data, error } = await supabase
       .from('tasks')
-      .update({
-        list_id: updates.listId,
-        title: updates.title,
-        notes: updates.notes,
-        estimate_minutes: updates.estimateMinutes,
-        due_date: updates.dueDate?.toISOString().split('T')[0] || null,
-        due_time: updates.dueTime,
-        status: updates.status,
-        recurrence_rule: updates.recurrenceRule,
-        parent_recurring_id: updates.parentRecurringId,
-        subtasks: updates.subtasks ? JSON.parse(JSON.stringify(updates.subtasks)) : undefined,
-        priority: updates.priority,
-        archived: updates.archived,
-        order_index: updates.orderIndex
-      })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
@@ -196,26 +260,41 @@ export const supabaseStorage = {
       return null;
     }
 
+    const taskData = data as any;
+    let priority = 3;
+    if (typeof taskData.priority === 'number') {
+      priority = taskData.priority;
+    } else if (typeof taskData.priority === 'string') {
+      switch (taskData.priority) {
+        case 'urgent': priority = 1; break;
+        case 'high': priority = 2; break;
+        case 'medium': priority = 3; break;
+        case 'low': priority = 4; break;
+        case 'lowest': priority = 5; break;
+        default: priority = 3;
+      }
+    }
+
     return {
-      id: data.id,
-      listId: data.list_id,
-      title: data.title,
-      notes: data.notes || '',
-      estimateMinutes: data.estimate_minutes,
-      dueDate: data.due_date ? new Date(data.due_date) : null,
-      dueTime: data.due_time,
-      status: data.status as TaskStatus,
-      recurrenceRule: data.recurrence_rule,
-      parentRecurringId: data.parent_recurring_id,
-      subtasks: (data.subtasks as unknown as Subtask[]) || [],
-      priority: data.priority || 3,
-      completedAt: data.completed_at ? new Date(data.completed_at) : null,
-      archived: data.archived || false,
-      orderIndex: data.order_index || 0,
-      tags: [], // Will be populated by joins later
-      dependencies: [], // Will be populated by joins later
-      createdAt: new Date(data.created_at),
-      updatedAt: new Date(data.updated_at)
+      id: taskData.id,
+      listId: taskData.list_id || '',
+      title: taskData.title,
+      notes: taskData.notes || taskData.description || '',
+      estimateMinutes: taskData.estimate_minutes || null,
+      dueDate: taskData.due_date ? new Date(taskData.due_date) : null,
+      dueTime: taskData.due_time || null,
+      status: taskData.status as TaskStatus,
+      recurrenceRule: taskData.recurrence_rule || null,
+      parentRecurringId: taskData.parent_recurring_id || null,
+      subtasks: taskData.subtasks || [],
+      priority,
+      completedAt: taskData.completed_at ? new Date(taskData.completed_at) : null,
+      archived: taskData.archived || false,
+      orderIndex: taskData.order_index || 0,
+      tags: [],
+      dependencies: [],
+      createdAt: new Date(taskData.created_at),
+      updatedAt: new Date(taskData.updated_at)
     };
   },
 
@@ -233,10 +312,10 @@ export const supabaseStorage = {
     return true;
   },
 
-  // Sessions
+  // Sessions - use pomodoro_sessions table
   getSessions: async (): Promise<Session[]> => {
     const { data, error } = await supabase
-      .from('sessions')
+      .from('pomodoro_sessions')
       .select('*')
       .order('started_at', { ascending: false });
 
@@ -245,29 +324,31 @@ export const supabaseStorage = {
       return [];
     }
 
-    return data.map(session => ({
+    return data.map((session: any) => ({
       id: session.id,
-      taskId: session.task_id,
-      mode: session.mode as TimerMode,
+      taskId: session.task_id || '',
+      mode: (session.mode as TimerMode) || TimerMode.CONTINUOUS,
       startedAt: new Date(session.started_at),
       endedAt: session.ended_at ? new Date(session.ended_at) : null,
-      workSeconds: session.work_seconds,
-      breakSeconds: session.break_seconds,
+      workSeconds: session.work_seconds || 0,
+      breakSeconds: session.break_seconds || 0,
       createdAt: new Date(session.created_at)
     }));
   },
 
   saveSession: async (session: Omit<Session, 'id' | 'createdAt'>): Promise<Session | null> => {
+    const insertData = {
+      task_id: session.taskId,
+      mode: session.mode,
+      started_at: session.startedAt.toISOString(),
+      ended_at: session.endedAt?.toISOString() || null,
+      work_seconds: session.workSeconds,
+      break_seconds: session.breakSeconds
+    };
+
     const { data, error } = await supabase
-      .from('sessions')
-      .insert([{
-        task_id: session.taskId,
-        mode: session.mode,
-        started_at: session.startedAt.toISOString(),
-        ended_at: session.endedAt?.toISOString() || null,
-        work_seconds: session.workSeconds,
-        break_seconds: session.breakSeconds
-      }])
+      .from('pomodoro_sessions')
+      .insert([insertData])
       .select()
       .single();
 
@@ -276,57 +357,28 @@ export const supabaseStorage = {
       return null;
     }
 
+    const sessionData = data as any;
     return {
-      id: data.id,
-      taskId: data.task_id,
-      mode: data.mode as TimerMode,
-      startedAt: new Date(data.started_at),
-      endedAt: data.ended_at ? new Date(data.ended_at) : null,
-      workSeconds: data.work_seconds,
-      breakSeconds: data.break_seconds,
-      createdAt: new Date(data.created_at)
+      id: sessionData.id,
+      taskId: sessionData.task_id || '',
+      mode: (sessionData.mode as TimerMode) || TimerMode.CONTINUOUS,
+      startedAt: new Date(sessionData.started_at),
+      endedAt: sessionData.ended_at ? new Date(sessionData.ended_at) : null,
+      workSeconds: sessionData.work_seconds || 0,
+      breakSeconds: sessionData.break_seconds || 0,
+      createdAt: new Date(sessionData.created_at)
     };
   },
 
-  // Streaks
+  // Streaks - fallback to localStorage since table doesn't exist
   getStreaks: async (): Promise<Streak[]> => {
-    const { data, error } = await supabase
-      .from('streaks')
-      .select('*')
-      .order('date', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching streaks:', error);
-      return [];
-    }
-
-    return data.map(streak => ({
-      id: streak.id,
-      date: new Date(streak.date),
-      tasksCompleted: streak.tasks_completed
-    }));
+    console.log('Using localStorage for streaks (table not available)');
+    return getStreaksFromLocalStorage();
   },
 
   saveStreak: async (streak: Omit<Streak, 'id'>): Promise<Streak | null> => {
-    const { data, error } = await supabase
-      .from('streaks')
-      .upsert([{
-        date: streak.date.toISOString().split('T')[0],
-        tasks_completed: streak.tasksCompleted
-      }])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error saving streak:', error);
-      return null;
-    }
-
-    return {
-      id: data.id,
-      date: new Date(data.date),
-      tasksCompleted: data.tasks_completed
-    };
+    console.log('Using localStorage for streaks (table not available)');
+    return saveStreakToLocalStorage(streak);
   },
 
   // Timer Settings (stored in localStorage for now)
@@ -350,4 +402,45 @@ function getDefaultTimerSettings(): TimerSettings {
     enableSounds: true,
     enableNotifications: true
   };
+}
+
+// LocalStorage fallback functions for streaks
+function getStreaksFromLocalStorage(): Streak[] {
+  try {
+    const data = localStorage.getItem('grit_streaks');
+    if (!data) return [];
+    return JSON.parse(data).map((streak: any) => ({
+      ...streak,
+      date: new Date(streak.date)
+    }));
+  } catch (error) {
+    console.error('Error reading streaks from localStorage:', error);
+    return [];
+  }
+}
+
+function saveStreakToLocalStorage(streak: Omit<Streak, 'id'>): Streak | null {
+  try {
+    const existing = getStreaksFromLocalStorage();
+    const id = `streak_${Date.now()}`;
+    const newStreak: Streak = {
+      id,
+      date: streak.date,
+      tasksCompleted: streak.tasksCompleted
+    };
+    
+    // Remove existing streak for the same date
+    const filtered = existing.filter(s => s.date.toDateString() !== streak.date.toDateString());
+    const updated = [...filtered, newStreak];
+    
+    localStorage.setItem('grit_streaks', JSON.stringify(updated.map(s => ({
+      ...s,
+      date: s.date.toISOString()
+    }))));
+    
+    return newStreak;
+  } catch (error) {
+    console.error('Error saving streak to localStorage:', error);
+    return null;
+  }
 }
