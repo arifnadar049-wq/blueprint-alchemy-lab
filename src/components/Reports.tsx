@@ -288,7 +288,7 @@ export const Reports = () => {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-6 bg-background animate-fade-in">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted rounded w-1/3"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -406,12 +406,21 @@ export const Reports = () => {
                   fill="#8884d8"
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}`}
+                  animationDuration={800}
+                  animationBegin={0}
                 >
                   {taskStatusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    color: 'hsl(var(--foreground))'
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           ) : (
@@ -437,8 +446,22 @@ export const Reports = () => {
                   height={60}
                 />
                 <YAxis />
-                <Tooltip formatter={(value) => [`${value}%`, 'Completion Rate']} />
-                <Bar dataKey="rate" fill="#10b981" />
+                <Tooltip 
+                  formatter={(value) => [`${value}%`, 'Completion Rate']}
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    color: 'hsl(var(--foreground))'
+                  }}
+                />
+                <Bar 
+                  dataKey="rate" 
+                  fill="#10b981" 
+                  radius={[4, 4, 0, 0]}
+                  animationDuration={800}
+                  animationBegin={300}
+                />
               </BarChart>
             </ResponsiveContainer>
           ) : (

@@ -182,12 +182,25 @@ export const Calendar = () => {
     }
   };
 
-  // Auto-sync if enabled
+  // Auto-sync if enabled and online/offline events
   useEffect(() => {
     if (googleSettings.connected && googleSettings.autoSync) {
       syncGoogleCalendar();
     }
   }, [date, googleSettings.connected, googleSettings.autoSync]);
+
+  // Auto-sync when coming back online
+  useEffect(() => {
+    const handleOnline = () => {
+      if (googleSettings.connected && googleSettings.autoSync) {
+        console.log('Device back online, syncing Google Calendar...');
+        syncGoogleCalendar();
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [googleSettings.connected, googleSettings.autoSync]);
 
   // Convert tasks to calendar events
   const taskEvents: CalendarEvent[] = useMemo(() => {
