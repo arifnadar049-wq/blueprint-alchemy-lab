@@ -88,60 +88,60 @@
   }
 
   .dark {
-    /* Dark mode - Productivity theme with better contrast */
-    --background: 220 13% 9%;
-    --foreground: 220 14% 95%;
+    /* Dark Gothic-Red theme */
+    --background: 350 15% 8%;
+    --foreground: 350 10% 95%;
     
-    --card: 220 13% 11%;
-    --card-foreground: 220 14% 95%;
+    --card: 350 20% 10%;
+    --card-foreground: 350 10% 95%;
     
-    --popover: 220 13% 11%;
-    --popover-foreground: 220 14% 95%;
+    --popover: 350 20% 10%;
+    --popover-foreground: 350 10% 95%;
     
-    --primary: 214 84% 56%;
-    --primary-foreground: 220 13% 9%;
-    --primary-hover: 214 84% 48%;
-    --primary-light: 214 84% 20%;
+    --primary: 0 75% 55%;
+    --primary-foreground: 350 10% 95%;
+    --primary-hover: 0 75% 45%;
+    --primary-light: 0 75% 20%;
     
-    --secondary: 220 13% 15%;
-    --secondary-foreground: 220 14% 95%;
-    --secondary-hover: 220 13% 18%;
+    --secondary: 350 20% 15%;
+    --secondary-foreground: 350 10% 95%;
+    --secondary-hover: 350 20% 18%;
     
-    --muted: 220 13% 15%;
-    --muted-foreground: 220 14% 75%;
+    --muted: 350 15% 15%;
+    --muted-foreground: 350 10% 75%;
     
-    --accent: 176 82% 45%;
-    --accent-foreground: 220 14% 95%;
-    --accent-light: 176 82% 15%;
+    --accent: 10 70% 50%;
+    --accent-foreground: 350 10% 95%;
+    --accent-light: 10 70% 15%;
     
     --destructive: 0 84% 60%;
-    --destructive-foreground: 220 14% 95%;
+    --destructive-foreground: 350 10% 95%;
     
     --warning: 38 92% 50%;
-    --warning-foreground: 220 14% 95%;
+    --warning-foreground: 350 10% 95%;
     
     --success: 142 76% 36%;
-    --success-foreground: 220 14% 95%;
+    --success-foreground: 350 10% 95%;
     
-    --border: 220 13% 18%;
-    --input: 220 13% 18%;
-    --ring: 220 14% 75%;
+    --border: 350 15% 18%;
+    --input: 350 15% 18%;
+    --ring: 0 75% 55%;
 
-    /* Focus & Timer Colors - Dark */
-    --focus-active: 214 84% 56%;
+    /* Focus & Timer Colors - Gothic Red */
+    --focus-active: 0 75% 55%;
     --focus-break: 142 76% 36%;
     --focus-paused: 38 92% 50%;
     
-    /* List Colors - Dark */
-    --list-backlog: 220 8% 65%;
-    --list-today: 214 84% 56%;
-    --list-week: 176 82% 45%;
+    /* List Colors - Gothic Red */
+    --list-backlog: 350 8% 65%;
+    --list-today: 0 75% 55%;
+    --list-week: 10 70% 50%;
     --list-completed: 142 76% 36%;
     
-    /* Gradients - Dark */
-    --gradient-primary: linear-gradient(135deg, hsl(214 84% 56%) 0%, hsl(176 82% 45%) 100%);
-    --gradient-surface: linear-gradient(135deg, hsl(220 13% 11%) 0%, hsl(220 13% 15%) 100%);
-    --gradient-focus: linear-gradient(90deg, hsl(214 84% 56%) 0%, hsl(214 84% 48%) 100%);
+    /* Gradients - Gothic Red */
+    --gradient-primary: linear-gradient(135deg, hsl(0 75% 55%) 0%, hsl(10 70% 50%) 100%);
+    --gradient-surface: linear-gradient(135deg, hsl(350 20% 10%) 0%, hsl(350 15% 15%) 100%);
+    --gradient-focus: linear-gradient(90deg, hsl(0 75% 55%) 0%, hsl(0 75% 45%) 100%);
     
     /* Shadows - Dark */
     --shadow-sm: 0 1px 2px 0 hsl(220 15% 0% / 0.3);
@@ -149,15 +149,15 @@
     --shadow-lg: 0 10px 15px -3px hsl(220 15% 0% / 0.4), 0 4px 6px -4px hsl(220 15% 0% / 0.4);
     --shadow-floating: 0 20px 25px -5px hsl(220 15% 0% / 0.4), 0 8px 10px -6px hsl(220 15% 0% / 0.4);
 
-    /* Sidebar dark mode variables */
-    --sidebar-background: 220 13% 9%;
-    --sidebar-foreground: 220 14% 95%;
-    --sidebar-primary: 220 14% 95%;
-    --sidebar-primary-foreground: 220 13% 9%;
-    --sidebar-accent: 220 13% 15%;
-    --sidebar-accent-foreground: 220 14% 95%;
-    --sidebar-border: 220 13% 18%;
-    --sidebar-ring: 214 84% 56%;
+    /* Sidebar gothic-red mode variables */
+    --sidebar-background: 350 15% 8%;
+    --sidebar-foreground: 350 10% 95%;
+    --sidebar-primary: 350 10% 95%;
+    --sidebar-primary-foreground: 350 15% 8%;
+    --sidebar-accent: 350 20% 15%;
+    --sidebar-accent-foreground: 350 10% 95%;
+    --sidebar-border: 350 15% 18%;
+    --sidebar-ring: 0 75% 55%;
   }
 }
 
